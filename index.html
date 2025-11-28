@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime4KCPP Playground</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff69b4; /* Changed to pink */
+            --secondary-color: #ffb6c1; /* Light pink */
+            --accent-color: #ff6b6b;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --text-secondary: #666666;
+            --border-color: #e0e0e0;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --error-color: #f44336;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Dark mode colors */
+        [data-theme="dark"] {
+            --primary-color: #ff69b4;
+            --secondary-color: #ffb6c1;
+            --accent-color: #ff6b6b;
+            --background-color: #1a1a1a;
+            --card-background: #2a2a2a;
+            --text-color: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --border-color: #444444;
+            --success-color: #66bb6a;
+            --warning-color: #ffa726;
+            --error-color: #ef5350;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></svg>');
+            background-size: 10px 10px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .panel {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: rgba(255, 105, 180, 0.05); /* Adjusted to pink */
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(255, 105, 180, 0.1); /* Adjusted to pink */
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent-color);
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+
+        .upload-area.has-image {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .image-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #f5f5f5;
+            position: relative;
+        }
+
+        [data-theme="dark"] .image-container {
+            background-color: #2a2a2a;
+        }
+
+        .image-container.has-image {
+            background-color: transparent;
+        }
+
+        .image-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+        }
+
+        .image-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .image-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+            color: white;
+            padding: 15px;
+            font-size: 0.9rem;
+        }
+
+        .controls-panel {
+            grid-column: 1 / -1;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s;
+        }
+
+        .controls-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .controls-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .parameters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .parameter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .parameter-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-color);
+        }
+
+        .parameter-control {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background-color: var(--card-background);
+            color: var(--text-color);
+        }
+
+        .parameter-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2); /* Adjusted to pink */
+        }
+
+        .button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .button-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .button-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3); /* Adjusted to pink */
+        }
+
+        .button-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .button-secondary:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3); /* Adjusted to pink */
+        }
+
+        .button-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .button-success:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .output-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-success {
+            background-color: var(--success-color);
+        }
+
+        .toast-error {
+            background-color: var(--error-color);
+        }
+
+        .toast-warning {
+            background-color: var(--warning-color);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        footer {
+            margin-top: 50px;
+            padding: 30px 0;
+            text-align: center;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            transition: color 0.3s;
+        }
+
+        @media (max-width: 968px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-panel {
+                grid-column: 1;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .comparison-container {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 80vh;
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comparison-container .image-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            min-height: 0; /* Allow flex child to shrink */
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .comparison-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .comparison-image:first-child {
+            clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+        }
+
+        .slider {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            transform: translateX(-50%);
+            cursor: col-resize;
+            transition: background 0.2s;
+        }
+
+        .slider:hover {
+            background: white;
+            width: 6px;
+        }
+
+        .slider-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .comparison-controls {
+            padding: 20px;
+            background: #2a2a2a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comparison-labels {
+            display: flex;
+            gap: 20px;
+        }
+
+        .label {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .original-label {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .result-label {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .comparison-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                width: 95%;
+                height: 70vh;
+            }
+
+            .comparison-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .comparison-labels {
+                order: 2;
+            }
+
+            .comparison-actions {
+                order: 1;
+            }
+        }
+
+        /* Dark mode toggle button */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .theme-toggle i {
+            font-size: 1.5rem;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Anime4KCPP Playground</h1>
+            <p>A high performance anime upscaler - in your browser</p>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-layout">
+            <div class="panel">
+                <div class="panel-header">
+                    <i class="fas fa-upload"></i>
+                    <h2 class="panel-title">Input</h2>
+                </div>
+
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p class="upload-text">Click or Drag and Drop</p>
+                    <p class="upload-hint">Supports JPG, PNG, and BMP images</p>
+                    <input type="file" id="fileInput" accept="image/jpeg, image/png, image/bmp">
+                </div>
+
+                <div class="image-container" id="inputImageContainer">
+                    <div class="image-placeholder" id="inputPlaceholder">
+                        <i class="fas fa-image"></i>
+                        <p>No image</p>
+                    </div>
+                    <img id="inputImage" class="preview-image hidden" alt="Input image">
+                    <div class="image-info hidden" id="inputImageInfo">
+                        <div id="inputImageDimensionsInfo"></div>
+                    </div>
+                </div>
+
+                <div class="output-actions" id="inputActions" style="display: none;">
+                    <button id="clearBtn" class="button button-secondary">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <i class="fas fa-image"></i>
+                    <h2 class="panel-title">Output</h2>
+                </div>
+
+                <div class="image-container" id="outputImageContainer">
+                    <div class="image-placeholder" id="outputPlaceholder">
+                        <i class="fas fa-magic"></i>
+                        <p>Waiting...</p>
+                    </div>
+                    <img id="outputImage" class="preview-image hidden" alt="Output image">
+                    <div class="image-info hidden" id="outputImageInfo">
+                        <div id="outputImageDimensionsInfo"></div>
+                    </div>
+                </div>
+
+                <div class="output-actions" id="outputActions" style="display: none;">
+                    <button id="downloadBtn" class="button button-success">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button id="compareBtn" class="button button-primary">
+                        <i class="fas fa-columns"></i> Compare
+                    </button>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="controls-header">
+                    <i class="fas fa-sliders-h"></i>
+                    <h2 class="controls-title">Settings</h2>
+                </div>
+
+                <div class="parameters">
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            <i class="fas fa-brain"></i> Models
+                        </label>
+                        <select id="model" class="parameter-control">
+                            <option value="acnet-gan">acnet-gan</option>
+                            <option value="acnet-hdn0">acnet-hdn0</option>
+                            <option value="acnet-hdn1">acnet-hdn1</option>
+                            <option value="acnet-hdn2">acnet-hdn2</option>
+                            <option value="arnet-b8-hdn">arnet-b8-hdn</option>
+                            <option value="arnet-b8-le">arnet-b8-le</option>
+                            <option value="arnet-b16-hdn">arnet-b16-hdn</option>
+                            <option value="arnet-b16-le" selected>arnet-b16-le</option>
+                            <option value="arnet-b24-hdn">arnet-b24-hdn</option>
+                            <option value="arnet-b24-le">arnet-b24-le</option>
+                            <option value="arnet-b32-hdn">arnet-b32-hdn</option>
+                            <option value="arnet-b32-le">arnet-b32-le</option>
+                        </select>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            <i class="fas fa-expand-arrows-alt"></i> Factor
+                        </label>
+                        <input type="range" id="factor" class="parameter-control" min="1" max="4" step="1" value="2">
+                        <div style="text-align: center; margin-top: 5px;">
+                            <span id="factorValue">2</span>x
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button id="processBtn" class="button button-primary" disabled>
+                        <i class="fas fa-play"></i> Process
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="comparisonModal" class="modal">
+        <div class="comparison-container">
+            <div class="image-container">
+                <div class="image-wrapper">
+                    <img id="comparisonOriginal" class="comparison-image" alt="Original">
+                    <img id="comparisonResult" class="comparison-image" alt="Upscaled result">
+                </div>
+                <div class="slider">
+                    <div class="slider-handle">
+                        <i class="fas fa-arrows-alt-h"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-controls">
+                <div class="comparison-labels">
+                    <span class="label original-label">Original</span>
+                    <span class="label result-label">Upscaled Result</span>
+                </div>
+                <div class="comparison-actions">
+                    <button id="closeComparison" class="button button-secondary">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 Anime4KCPP Playground</p>
+            <p>Based on Anime4KCPP Project | Powered by WebAssembly</p>
+        </div>
+    </footer>
+
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Operation successful</span>
+    </div>
+
+    <script src="ac_cli.js"></script>
+    <script>
+        let selectedFile = null;
+        let originalImageDataURL = null;
+        let resultImageDataURL = null;
+        let originalImageDataBuffer = null;
+        let resultImageDatBuffer = null;
+        let outputFileName = 'upscaled.png'
+        let module = null;
+        let isProcessing = false;
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const inputImageContainer = document.getElementById('inputImageContainer');
+        const inputPlaceholder = document.getElementById('inputPlaceholder');
+        const inputImage = document.getElementById('inputImage');
+        const inputImageInfo = document.getElementById('inputImageInfo');
+        const inputImageDimensionsInfo = document.getElementById('inputImageDimensionsInfo');
+        const inputActions = document.getElementById('inputActions');
+        const clearBtn = document.getElementById('clearBtn');
+        const outputImageContainer = document.getElementById('outputImageContainer');
+        const outputPlaceholder = document.getElementById('outputPlaceholder');
+        const outputImage = document.getElementById('outputImage');
+        const outputImageInfo = document.getElementById('outputImageInfo');
+        const outputImageDimensionsInfo = document.getElementById('outputImageDimensionsInfo');
+        const outputActions = document.getElementById('outputActions');
+        const processBtn = document.getElementById('processBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const factorSlider = document.getElementById('factor');
+        const factorValue = document.getElementById('factorValue');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Dark mode toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        // Check for saved theme preference or default to light
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+
+            showToast(`Switched to ${newTheme} mode`, 'success');
+        });
+
+        async function initModule() {
+            try {
+                module = await Module();
+                showToast('WebAssembly module loaded successfully', 'success');
+            } catch (error) {
+                showToast('WebAssembly module loading failed: ' + error.message, 'error');
+                console.error('initModule:', error);
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            toast.className = 'toast toast-' + type;
+
+            const icon = toast.querySelector('i');
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle';
+            } else if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle';
+            } else if (type === 'warning') {
+                icon.className = 'fas fa-exclamation-triangle';
+            }
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function clearInput() {
+            selectedFile = null;
+            originalImageDataURL = null;
+            fileInput.value = '';
+            inputImage.src = '';
+            inputImage.classList.add('hidden');
+            inputPlaceholder.classList.remove('hidden');
+            inputImageContainer.classList.remove('has-image');
+            inputImageInfo.classList.add('hidden');
+            uploadArea.classList.remove('has-image');
+            inputActions.style.display = 'none';
+            processBtn.disabled = true;
+        }
+
+        function clearOutput() {
+            resultImageDataURL = null;
+            outputImage.src = '';
+            outputImage.classList.add('hidden');
+            outputPlaceholder.classList.remove('hidden');
+            outputImageContainer.classList.remove('has-image');
+            outputImageInfo.classList.add('hidden');
+            outputActions.style.display = 'none';
+        }
+
+        function readFileAsArrayBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleFile(file) {
+            selectedFile = file;
+
+            originalImageDataURL = await readFileAsDataURL(selectedFile)
+            originalImageDataBuffer = await readFileAsArrayBuffer(selectedFile)
+
+            inputImage.onload = () => {
+                inputImageDimensionsInfo.textContent = `${inputImage.naturalWidth} × ${inputImage.naturalHeight}`;
+                inputImageInfo.classList.remove('hidden');
+                inputImage.classList.remove('hidden');
+                inputPlaceholder.classList.add('hidden');
+                inputImageContainer.classList.add('has-image');
+            }
+            inputImage.src = originalImageDataURL
+
+            uploadArea.classList.add('has-image');
+            inputActions.style.display = 'flex';
+
+            processBtn.disabled = false;
+
+            showToast('Image uploaded successfully', 'success');
+        }
+
+        async function process(inputFileName, model, factor) {
+            module.FS.writeFile(inputFileName, new Uint8Array(originalImageDataBuffer));
+            module.callMain(['-i', inputFileName, '-o', outputFileName, '-m', model, '-f', factor]);
+            return module.FS.readFile(outputFileName)
+        }
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                handleFile(file);
+            } else {
+                showToast('Please upload a valid image', 'warning');
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            clearInput();
+            clearOutput();
+            showToast('Image cleared', 'success');
+        });
+
+        factorSlider.addEventListener('input', () => {
+            factorValue.textContent = factorSlider.value;
+        });
+
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile || isProcessing) return;
+
+            isProcessing = true;
+            processBtn.disabled = true;
+
+            const model = document.getElementById('model').value;
+            const factor = factorSlider.value;
+
+            resultImageDatBuffer = await process(selectedFile.name, model, factor);
+
+            resultImageDataURL = URL.createObjectURL(new Blob([resultImageDatBuffer.buffer], { type: 'image/png' }));
+
+            outputImage.onload = () => {
+                outputImageDimensionsInfo.textContent = `${Math.round(outputImage.naturalWidth)} × ${Math.round(outputImage.naturalHeight)}`;
+                outputImageInfo.classList.remove('hidden');
+                outputImage.classList.remove('hidden');
+                outputPlaceholder.classList.add('hidden');
+                outputImageContainer.classList.add('has-image');
+            };
+            outputImage.src = resultImageDataURL
+
+            outputActions.style.display = 'flex';
+
+            isProcessing = false;
+            processBtn.disabled = false;
+
+            showToast('Done!', 'success');
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!resultImageDataURL) return;
+
+            const link = document.createElement('a');
+            link.href = resultImageDataURL;
+            link.download = outputFileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize WASM module
+            initModule();
+        });
+
+
+        let isDragging = false;
+
+        const compareBtn = document.getElementById('compareBtn');
+        const comparisonModal = document.getElementById('comparisonModal');
+        const closeComparison = document.getElementById('closeComparison');
+        const comparisonOriginal = document.getElementById('comparisonOriginal');
+        const comparisonResult = document.getElementById('comparisonResult');
+        const slider = document.querySelector('.slider');
+        const imageWrapper = document.querySelector('.image-wrapper');
+
+        function openComparisonModal() {
+            if (!originalImageDataURL || !resultImageDataURL) {
+                return;
+            }
+
+            comparisonModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            comparisonResult.onload = () => {
+                const resultWidth = comparisonResult.naturalWidth;
+                const resultHeight = comparisonResult.naturalHeight;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = resultWidth;
+                canvas.height = resultHeight;
+                const ctx = canvas.getContext('2d');
+
+                const originalImg = new Image();
+                originalImg.onload = function() {
+
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(originalImg, 0, 0, resultWidth, resultHeight);
+
+                    comparisonOriginal.src = canvas.toDataURL('image/png');
+
+                    updateSliderPosition(50);
+                };
+                originalImg.src = originalImageDataURL;
+            };
+            comparisonResult.src = resultImageDataURL;
+        }
+
+        function closeComparisonModal() {
+            comparisonModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateSliderPosition(percentage) {
+            const clampedPercentage = Math.max(0, Math.min(100, percentage));
+            slider.style.left = `${clampedPercentage}%`;
+            comparisonOriginal.style.clipPath = `polygon(0 0, ${clampedPercentage}% 0, ${clampedPercentage}% 100%, 0 100%)`;
+            comparisonResult.style.clipPath = `polygon(${clampedPercentage}% 0, 100% 0, 100% 100%, ${clampedPercentage}% 100%)`;
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+
+            const containerRect = imageWrapper.getBoundingClientRect();
+            let xPos;
+
+            if (e.type.includes('touch')) {
+                xPos = e.touches[0].clientX - containerRect.left;
+            } else {
+                xPos = e.clientX - containerRect.left;
+            }
+
+            const percentage = (xPos / containerRect.width) * 100;
+            updateSliderPosition(percentage);
+        }
+
+        function startDrag(e) {
+            e.preventDefault();
+            isDragging = true;
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('touchmove', onDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+
+            slider.style.background = 'white';
+            slider.style.width = '6px';
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('touchmove', onDrag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+
+            slider.style.background = 'rgba(255, 255, 255, 0.8)';
+            slider.style.width = '4px';
+        }
+
+        // ESC to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && comparisonModal.classList.contains('active')) {
+                closeComparisonModal();
+            }
+        });
+
+        document.addEventListener('selectstart', (e) => {
+            if (isDragging) e.preventDefault();
+        });
+
+        slider.addEventListener('mousedown', startDrag);
+        slider.addEventListener('touchstart', startDrag);
+        compareBtn.addEventListener('click', openComparisonModal);
+        closeComparison.addEventListener('click', closeComparisonModal);
+        comparisonModal.addEventListener('click', (e) => {
+            if (e.target === comparisonModal) {
+                closeComparisonModal();
+            }
+        });
+
+    </script>
+</body>
+</html>
