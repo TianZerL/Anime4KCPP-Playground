@@ -1,0 +1,65 @@
+name: Deploy playground content to Pages
+
+on:
+  push:
+    branches: ["main"]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout playground
+        uses: actions/checkout@v4
+        with:
+          path: playground
+
+      - name: Checkout Anime4KCPP
+        uses: actions/checkout@v4
+        with:
+          repository: TianZerL/Anime4KCPP
+          ref: v3.1-dev
+          path: Anime4KCPP
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Build
+        run: |
+          cd Anime4KCPP
+          mkdir build_wasm && cd build_wasm
+          emcmake cmake .. -DCMAKE_EXE_LINKER_FLAGS="-sMODULARIZE=1 -sINVOKE_RUN=0 -sEXPORTED_RUNTIME_METHODS=['FS','callMain'] -sENVIRONMENT=web"
+          cmake --build . --parallel 4
+          cp bin/ac_cli* ../../playground
+
+      - name: Verify built files
+        run: |
+          echo "Playground directory contents:"
+          ls -la playground/
+          echo "Checking for wasm/js files:"
+          find playground/ -name "*.wasm" -o -name "*.js" | head -10
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'playground'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
