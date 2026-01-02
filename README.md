@@ -1,5 +1,5 @@
 # Anime4KCPP-Playground
-A high performance anime upscaler - in your browser
+A high performance anime upscaler - in your browser. [Try it!](https://tianzerl.github.io/Anime4KCPP-Playground/)
 
 # build
 ```shell
