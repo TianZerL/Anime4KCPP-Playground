@@ -693,39 +693,6 @@
                             <i class="fas fa-brain"></i> Models
                         </label>
                         <select id="model" class="parameter-control">
-                            <option value="acnet-gan">acnet-gan</option>
-                            <option value="acnet-hdn0">acnet-hdn0</option>
-                            <option value="acnet-hdn1">acnet-hdn1</option>
-                            <option value="acnet-hdn2">acnet-hdn2</option>
-                            <option value="acnet-hdn3">acnet-hdn3</option>
-                            <option value="arnet-b4-hdn">arnet-b4-hdn</option>
-                            <option value="arnet-b4-hdns">arnet-b4-hdns</option>
-                            <option value="arnet-b4-le">arnet-b4-le</option>
-                            <option value="arnet-b4-ls">arnet-b4-ls</option>
-                            <option value="arnet-b8-hdn">arnet-b8-hdn</option>
-                            <option value="arnet-b8-hdns">arnet-b8-hdns</option>
-                            <option value="arnet-b8-le">arnet-b8-le</option>
-                            <option value="arnet-b8-ls">arnet-b8-ls</option>
-                            <option value="arnet-b16-hdn">arnet-b16-hdn</option>
-                            <option value="arnet-b16-hdns">arnet-b16-hdns</option>
-                            <option value="arnet-b16-le">arnet-b16-le</option>
-                            <option value="arnet-b16-ls">arnet-b16-ls</option>
-                            <option value="arnet-b24-hdn">arnet-b24-hdn</option>
-                            <option value="arnet-b24-hdns">arnet-b24-hdns</option>
-                            <option value="arnet-b24-le">arnet-b24-le</option>
-                            <option value="arnet-b24-ls">arnet-b24-ls</option>
-                            <option value="arnet-b32-hdn">arnet-b32-hdn</option>
-                            <option value="arnet-b32-hdns">arnet-b32-hdns</option>
-                            <option value="arnet-b32-le">arnet-b32-le</option>
-                            <option value="arnet-b32-ls">arnet-b32-ls</option>
-                            <option value="arnet-b48-hdn">arnet-b48-hdn</option>
-                            <option value="arnet-b48-hdns">arnet-b48-hdns</option>
-                            <option value="arnet-b48-le">arnet-b48-le</option>
-                            <option value="arnet-b48-ls">arnet-b48-ls</option>
-                            <option value="arnet-b64-hdn">arnet-b64-hdn</option>
-                            <option value="arnet-b64-hdns">arnet-b64-hdns</option>
-                            <option value="arnet-b64-le">arnet-b64-le</option>
-                            <option value="arnet-b64-ls">arnet-b64-ls</option>
                         </select>
                     </div>
 
@@ -799,6 +766,9 @@
         let outputFileName = 'upscaled.png'
         let module = null;
         let isProcessing = false;
+        let modelList = null;
+        let stdoutString = '';
+        let stderrString = '';
 
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
@@ -832,6 +802,44 @@
         html.setAttribute('data-theme', currentTheme);
         updateThemeIcon(currentTheme);
 
+        function parseModelsListing(text) {
+            const lines = text.split(/\r?\n/);
+            const models = [];
+            let currentModel = null;
+            let inModel = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.trim() === '') continue;
+
+                const modelMatch = line.match(/^  ([a-zA-Z0-9_\-]+):\s*$/);
+                if (modelMatch) {
+                    if (currentModel !== null) {
+                        models.push(currentModel);
+                    }
+                    currentModel = { name: modelMatch[1] };
+                    inModel = true;
+                    continue;
+                }
+
+                if (!inModel || currentModel === null) continue;
+
+                const fieldMatch = line.match(/^\s{2,}([^:]+):\s+(.*)$/);
+                if (fieldMatch) {
+                    let key = fieldMatch[1].trim();
+                    let value = fieldMatch[2].trim();
+                    key = key.replace(/ /g, '_');
+                    currentModel[key] = value;
+                }
+            }
+
+            if (currentModel !== null) {
+                models.push(currentModel);
+            }
+
+            return models;
+        }
+
         function updateThemeIcon(theme) {
             if (theme === 'dark') {
                 themeIcon.classList.remove('fa-moon');
@@ -855,7 +863,10 @@
 
         async function initModule() {
             try {
-                module = await Module();
+                module = await Module({
+                    print: function(text) { stdoutString += text + '\n'; },
+                    printErr: function(text) { stderrString += text; }
+                });
                 showToast('WebAssembly module loaded successfully', 'success');
             } catch (error) {
                 showToast('WebAssembly module loading failed: ' + error.message, 'error');
@@ -954,6 +965,12 @@
             return module.FS.readFile(outputFileName)
         }
 
+        async function getModels() {
+            stdoutString = ''
+            module.callMain(['--lm']);
+            return parseModelsListing(stdoutString)
+        }
+
         uploadArea.addEventListener('click', () => {
             fileInput.click();
         });
@@ -1037,9 +1054,24 @@
             document.body.removeChild(link);
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize WASM module
-            initModule();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initModule(); // Initialize WASM module
+
+            modelList = await getModels();
+
+            const modelSelect = document.getElementById('model');
+            modelSelect.innerHTML = '';
+
+            modelList.forEach(model => {
+                const option = new Option(model.name, model.name);
+                option.title = '';
+                if (model.parameter_count) option.title += `parameter count: ${model.parameter_count}\n`
+                if (model.version) option.title += `version: ${model.version}\n`
+                if (model.author) option.title += `author: ${model.author}\n`
+                if (model.homepage) option.title += `homepage: ${model.homepage}\n`
+                if (model.description) option.title += `description: ${model.description}\n`
+                modelSelect.appendChild(option);
+            });
         });
 
 

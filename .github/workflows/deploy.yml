@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: TianZerL/Anime4KCPP
-          ref: v3.1-dev
+          ref: arnet-dev
           path: Anime4KCPP
 
       - name: Setup Emscripten
