@@ -22,22 +22,22 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout playground
-        uses: actions/checkout@v4
+      - name: checkout playground
+        uses: actions/checkout@v6
         with:
           path: playground
 
-      - name: Checkout Anime4KCPP
-        uses: actions/checkout@v4
+      - name: checkout Anime4KCPP
+        uses: actions/checkout@v6
         with:
           repository: TianZerL/Anime4KCPP
-          ref: arnet-dev
+          ref: master
           path: Anime4KCPP
 
-      - name: Setup Emscripten
+      - name: setup Emscripten
         uses: mymindstorm/setup-emsdk@v14
 
-      - name: Build
+      - name: build Anime4KCPP
         run: |
           cd Anime4KCPP
           mkdir build_wasm && cd build_wasm
@@ -45,21 +45,21 @@ jobs:
           cmake --build . --parallel 4
           cp bin/ac_cli* ../../playground
 
-      - name: Verify built files
+      - name: verify built files
         run: |
           echo "Playground directory contents:"
           ls -la playground/
           echo "Checking for wasm/js files:"
           find playground/ -name "*.wasm" -o -name "*.js" | head -10
 
-      - name: Setup Pages
+      - name: setup pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact
+      - name: upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'playground'
 
-      - name: Deploy to GitHub Pages
+      - name: deploy
         id: deployment
         uses: actions/deploy-pages@v4

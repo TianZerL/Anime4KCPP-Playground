@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime4KCPP Playground</title>
+    <link rel="icon" type="image/x-icon" href="images/Logo.ico">
+    <link rel="apple-touch-icon" href="images/Logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #ff69b4; /* Changed to pink */
-            --secondary-color: #ffb6c1; /* Light pink */
+            --primary-color: #ff5e9e;
+            --secondary-color: #ffb6c1;
             --accent-color: #ff6b6b;
             --background-color: #f8f9fa;
             --card-background: #ffffff;
@@ -24,7 +26,7 @@
 
         /* Dark mode colors */
         [data-theme="dark"] {
-            --primary-color: #ff69b4;
+            --primary-color: #ff7eb6;
             --secondary-color: #ffb6c1;
             --accent-color: #ff6b6b;
             --background-color: #1a1a1a;
@@ -61,10 +63,9 @@
         }
 
         header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(to left, var(--secondary-color), var(--primary-color));
             color: white;
-            padding: 30px 0;
-            text-align: center;
+            padding: 25px 0;
             box-shadow: var(--shadow);
             position: relative;
             overflow: hidden;
@@ -79,21 +80,113 @@
             height: 100%;
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></svg>');
             background-size: 10px 10px;
+            pointer-events: none;
         }
 
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
 
-        header p {
+        .header-main {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header-logo {
+            height: 96px;
+            width: auto;
+            border-radius: 16px;
+            display: block;
+        }
+
+        @media (max-width: 968px) {
+            .header-main {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+            
+            .title-area {
+                text-align: center;
+            }
+            
+            .header-logo {
+                height: 96px;
+                margin: 0 auto;
+            }
+
+            .header-actions {
+                margin-top: 8px;
+                justify-content: center;
+            }
+        }
+
+        .header-main h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header-main p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 5px 10px;
+            border-radius: 60px;
+            backdrop-filter: blur(8px);
+        }
+
+        .github-button, .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 40px;
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: white;
+            text-decoration: none;
+            font-family: inherit;
+            backdrop-filter: blur(4px);
+        }
+
+        .github-button i, .theme-toggle i {
             font-size: 1.2rem;
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
+        }
+
+        .github-button span {
+            display: inline-block;
+        }
+
+        .theme-toggle {
+            padding: 8px;
+            border-radius: 50%;
+            width: 44px;
+            justify-content: center;
+        }
+
+        .github-button:hover, .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .main-layout {
@@ -135,13 +228,13 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            background-color: rgba(255, 105, 180, 0.05); /* Adjusted to pink */
+            background-color: rgba(255, 105, 180, 0.05);
             margin-bottom: 20px;
         }
 
         .upload-area:hover {
             border-color: var(--primary-color);
-            background-color: rgba(255, 105, 180, 0.1); /* Adjusted to pink */
+            background-color: rgba(255, 105, 180, 0.1);
         }
 
         .upload-area.dragover {
@@ -283,7 +376,7 @@
         .parameter-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2); /* Adjusted to pink */
+            box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2);
         }
 
         .button {
@@ -307,7 +400,7 @@
         .button-primary:hover {
             background-color: var(--secondary-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3); /* Adjusted to pink */
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3);
         }
 
         .button-secondary {
@@ -318,7 +411,7 @@
         .button-secondary:hover {
             background-color: var(--primary-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3); /* Adjusted to pink */
+            box-shadow: 0 4px 8px rgba(255, 182, 193, 0.3);
         }
 
         .button-success {
@@ -414,6 +507,31 @@
             transition: color 0.3s;
         }
 
+        .footer-links {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+            transform: translateY(-1px);
+        }
+
         @media (max-width: 968px) {
             .main-layout {
                 grid-template-columns: 1fr;
@@ -423,12 +541,21 @@
                 grid-column: 1;
             }
 
-            header h1 {
-                font-size: 2rem;
+            header .container {
+                flex-direction: column;
+                text-align: center;
             }
 
-            .button-group {
-                flex-direction: column;
+            .header-main {
+                text-align: center;
+            }
+
+            .header-actions {
+                justify-content: center;
+            }
+
+            .github-button span {
+                display: inline;
             }
         }
 
@@ -469,7 +596,7 @@
             flex: 1;
             position: relative;
             overflow: hidden;
-            min-height: 0; /* Allow flex child to shrink */
+            min-height: 0;
         }
 
         .image-wrapper {
@@ -571,53 +698,30 @@
                 flex-direction: column;
                 gap: 15px;
             }
-
-            .comparison-labels {
-                order: 2;
-            }
-
-            .comparison-actions {
-                order: 1;
-            }
-        }
-
-        /* Dark mode toggle button */
-        .theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 10;
-        }
-
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-
-        .theme-toggle i {
-            font-size: 1.5rem;
-            color: white;
         }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Anime4KCPP Playground</h1>
-            <p>A high performance anime upscaler - in your browser</p>
-            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-                <i class="fas fa-moon" id="themeIcon"></i>
-            </button>
+            <div class="header-main">
+                <div class="logo-area">
+                    <img src="images/Logo.png" alt="Anime4KCPP Logo" class="header-logo">
+                </div>
+                <div class="title-area">
+                    <h1>Anime4KCPP Playground</h1>
+                    <p>A high performance anime upscaler - in your browser</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="https://github.com/TianZerL/Anime4KCPP" target="_blank" rel="noopener noreferrer" class="github-button" aria-label="GitHub repository">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -748,6 +852,14 @@
         <div class="container">
             <p>© 2026 Anime4KCPP Playground</p>
             <p>Based on Anime4KCPP Project | Powered by WebAssembly</p>
+            <div class="footer-links">
+                <a href="https://github.com/TianZerL/Anime4KCPP" target="_blank" rel="noopener noreferrer" class="footer-link">
+                    <i class="fab fa-github"></i> Anime4KCPP
+                </a>
+                <a href="https://github.com/TianZerL/Anime4KCPP-Playground" target="_blank" rel="noopener noreferrer" class="footer-link">
+                    <i class="fab fa-github"></i> Anime4KCPP-Playground
+                </a>
+            </div>
         </div>
     </footer>
 
@@ -1040,7 +1152,7 @@
             isProcessing = false;
             processBtn.disabled = false;
 
-            showToast('Done!', 'success');
+            showToast('Upscaling completed!', 'success');
         });
 
         downloadBtn.addEventListener('click', () => {
@@ -1055,10 +1167,8 @@
         });
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await initModule(); // Initialize WASM module
-
+            await initModule();
             modelList = await getModels();
-
             const modelSelect = document.getElementById('model');
             modelSelect.innerHTML = '';
 
@@ -1074,7 +1184,6 @@
             });
         });
 
-
         let isDragging = false;
 
         const compareBtn = document.getElementById('compareBtn');
@@ -1087,6 +1196,7 @@
 
         function openComparisonModal() {
             if (!originalImageDataURL || !resultImageDataURL) {
+                showToast('Please upscale an image first', 'warning');
                 return;
             }
 
@@ -1104,13 +1214,10 @@
 
                 const originalImg = new Image();
                 originalImg.onload = function() {
-
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(originalImg, 0, 0, resultWidth, resultHeight);
-
                     comparisonOriginal.src = canvas.toDataURL('image/png');
-
                     updateSliderPosition(50);
                 };
                 originalImg.src = originalImageDataURL;
@@ -1132,16 +1239,13 @@
 
         function onDrag(e) {
             if (!isDragging) return;
-
             const containerRect = imageWrapper.getBoundingClientRect();
             let xPos;
-
             if (e.type.includes('touch')) {
                 xPos = e.touches[0].clientX - containerRect.left;
             } else {
                 xPos = e.clientX - containerRect.left;
             }
-
             const percentage = (xPos / containerRect.width) * 100;
             updateSliderPosition(percentage);
         }
@@ -1153,7 +1257,6 @@
             document.addEventListener('touchmove', onDrag);
             document.addEventListener('mouseup', stopDrag);
             document.addEventListener('touchend', stopDrag);
-
             slider.style.background = 'white';
             slider.style.width = '6px';
         }
@@ -1164,7 +1267,6 @@
             document.removeEventListener('touchmove', onDrag);
             document.removeEventListener('mouseup', stopDrag);
             document.removeEventListener('touchend', stopDrag);
-
             slider.style.background = 'rgba(255, 255, 255, 0.8)';
             slider.style.width = '4px';
         }
@@ -1189,7 +1291,6 @@
                 closeComparisonModal();
             }
         });
-
     </script>
 </body>
 </html>
