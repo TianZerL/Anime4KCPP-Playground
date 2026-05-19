@@ -728,4 +728,25 @@ footer {
         grid-column: 1;
         justify-self: center;
     }
+
+    .output-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #compareBtn, .download-items {
+        max-width: 320px;
+        width: 80%;
+        justify-content: center;
+    }
+
+    .download-items {
+        display: flex;
+        gap: 10px;
+    }
+
+    #downloadBtn {
+        flex: 1;
+        justify-content: center;
+    }
 }
