@@ -1,4 +1,4 @@
-import { initWasm, fetchModels, processImage, getLastStderr } from './wasm.js';
+import { initWasm, fetchModels, processImage } from './wasm.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -284,8 +284,7 @@ async function handleProcess() {
         el.outputActions.style.display = 'flex';
         showToast('Upscaling completed!', 'success');
     } catch (err) {
-        const stderr = getLastStderr();
-        showToast('Processing failed: ' + (stderr || err.message), 'error');
+        showToast('Processing failed: ' + (err.stderr || err.message), 'error');
         console.error('processImage:', err);
     } finally {
         state.isProcessing = false;

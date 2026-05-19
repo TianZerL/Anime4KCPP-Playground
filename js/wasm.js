@@ -1,25 +1,47 @@
-let wasmModule = null;
-let stdoutBuffer = '';
-let stderrBuffer = '';
+let worker = null;
+let requestId = 0;
+const pending = new Map();
 
-export function isInitialized() {
-    return wasmModule !== null;
+function send(msg, transfer) {
+    return new Promise((resolve, reject) => {
+        const id = ++requestId;
+        msg._id = id;
+        pending.set(id, { resolve, reject });
+        worker.postMessage(msg, transfer);
+    });
 }
 
 export async function initWasm() {
-    stdoutBuffer = '';
-    stderrBuffer = '';
+    if (worker) {
+        worker.terminate();
+        pending.clear();
+    }
 
-    wasmModule = await Module({
-        print: function (text) {
-            stdoutBuffer += text + '\n';
-        },
-        printErr: function (text) {
-            stderrBuffer += text + '\n';
+    worker = new Worker('js/worker.js');
+
+    worker.onmessage = (e) => {
+        const msg = e.data;
+        const cb = pending.get(msg._id);
+        if (!cb) return;
+        pending.delete(msg._id);
+
+        if (msg.type === 'error') {
+            const err = new Error(msg.message || 'Unknown error');
+            err.stderr = msg.stderr || '';
+            cb.reject(err);
+        } else {
+            cb.resolve(msg);
         }
-    });
+    };
 
-    return wasmModule;
+    worker.onerror = (e) => {
+        console.error('Worker error:', e);
+    };
+
+    const res = await send({ type: 'init' });
+    if (!res.success) {
+        throw new Error(res.error || 'WASM initialization failed');
+    }
 }
 
 export function parseModelsListing(text) {
@@ -61,38 +83,18 @@ export function parseModelsListing(text) {
 }
 
 export async function fetchModels() {
-    if (!wasmModule) {
-        throw new Error('WASM module not initialized');
-    }
-
-    stdoutBuffer = '';
-    wasmModule.callMain(['--lm']);
-    return parseModelsListing(stdoutBuffer);
+    const res = await send({ type: 'listModels' });
+    return parseModelsListing(res.text);
 }
 
 export async function processImage(fileName, fileBuffer, model, factor) {
-    if (!wasmModule) {
-        throw new Error('WASM module not initialized');
-    }
+    const res = await send({
+        type: 'process',
+        fileName,
+        fileBuffer,
+        model,
+        factor
+    });
 
-    const outputName = 'upscaled.png';
-
-    stdoutBuffer = '';
-    stderrBuffer = '';
-
-    try {
-        wasmModule.FS.writeFile(fileName, new Uint8Array(fileBuffer));
-        wasmModule.callMain(['-i', fileName, '-o', outputName, '-m', model, '-f', String(factor)]);
-
-        const resultBuffer = wasmModule.FS.readFile(outputName);
-
-        return { buffer: resultBuffer, format: 'image/png' };
-    } finally {
-        try { wasmModule.FS.unlink(fileName); } catch (_) { /* ignore */ }
-        try { wasmModule.FS.unlink(outputName); } catch (_) { /* ignore */ }
-    }
-}
-
-export function getLastStderr() {
-    return stderrBuffer;
+    return { buffer: new Uint8Array(res.buffer), format: 'image/png' };
 }

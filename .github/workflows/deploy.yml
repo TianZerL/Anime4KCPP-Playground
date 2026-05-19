@@ -35,13 +35,13 @@ jobs:
           path: Anime4KCPP
 
       - name: setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
+        uses: emscripten-core/setup-emsdk@v16
 
       - name: build Anime4KCPP
         run: |
           cd Anime4KCPP
           mkdir build_wasm && cd build_wasm
-          emcmake cmake .. -DCMAKE_EXE_LINKER_FLAGS="-sMODULARIZE=1 -sINVOKE_RUN=0 -sEXPORTED_RUNTIME_METHODS=['FS','callMain'] -sENVIRONMENT=web"
+          emcmake cmake .. -DCMAKE_EXE_LINKER_FLAGS="-sMODULARIZE=1 -sINVOKE_RUN=0 -sEXPORTED_RUNTIME_METHODS=['FS','callMain'] -sENVIRONMENT=web,worker"
           cmake --build . --parallel 4
           cp bin/ac_cli* ../../playground
 
@@ -53,13 +53,13 @@ jobs:
           find playground/ -name "*.wasm" -o -name "*.js" | head -10
 
       - name: setup pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: 'playground'
 
       - name: deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
