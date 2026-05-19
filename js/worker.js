@@ -9,6 +9,7 @@ async function handleInit() {
         locateFile: function (path) {
             return '../' + path;
         },
+        mainScriptUrlOrBlob: '../ac_cli.js',
         print: function (text) {
             stdoutBuffer += text + '\n';
         },
