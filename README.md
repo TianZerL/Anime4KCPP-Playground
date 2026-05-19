@@ -12,6 +12,7 @@ git clone https://github.com/TianZerL/Anime4KCPP.git
 cd Anime4KCPP
 mkdir build_wasm && cd build_wasm
 emcmake cmake .. \
+  -DAC_CORE_ENABLE_FAST_MATH=ON \
   -DCMAKE_EXE_LINKER_FLAGS="\
     -sMODULARIZE=1 \
     -sINVOKE_RUN=0 \
@@ -27,6 +28,7 @@ git clone https://github.com/TianZerL/Anime4KCPP.git
 cd Anime4KCPP
 mkdir build_wasm && cd build_wasm
 emcmake cmake .. \
+  -DAC_CORE_ENABLE_FAST_MATH=ON \
   -DCMAKE_CXX_FLAGS="-sUSE_PTHREADS=1" \
   -DCMAKE_EXE_LINKER_FLAGS="\
     -sMODULARIZE=1 \

@@ -6,6 +6,15 @@
     <title>Anime4KCPP Playground</title>
     <link rel="icon" type="image/x-icon" href="images/Logo.ico">
     <link rel="apple-touch-icon" href="images/Logo.png">
+    <script>
+        (function() {
+            var theme = localStorage.getItem('theme');
+            if (!theme) {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
