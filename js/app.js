@@ -40,6 +40,7 @@ const el = {
     viewResultBtn: $('viewResultBtn'),
     viewerModal: $('imageViewer'),
     viewerImage: $('viewerImage'),
+    clickGuard: $('clickGuard'),
 };
 
 const state = {
@@ -52,7 +53,7 @@ const state = {
     wasmReady: false,
 };
 
-function showToast(message, type = 'success') {
+function showToast(message, type = 'success', persist = false) {
     el.toastMessage.textContent = message;
     el.toast.className = 'toast toast-' + type;
 
@@ -60,11 +61,19 @@ function showToast(message, type = 'success') {
         success: 'fa-check-circle',
         error: 'fa-exclamation-circle',
         warning: 'fa-exclamation-triangle',
+        loading: 'fa-circle-notch fa-spin',
     };
     el.toastIcon.className = 'fas ' + (icons[type] || icons.success);
 
     el.toast.classList.add('show');
-    setTimeout(() => el.toast.classList.remove('show'), 3000);
+
+    if (!persist) {
+        setTimeout(() => el.toast.classList.remove('show'), 3000);
+    }
+}
+
+function hideToast() {
+    el.toast.classList.remove('show');
 }
 
 function updateThemeIcon(theme) {
@@ -113,7 +122,6 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
         updateThemeIcon(next);
-        showToast('Switched to ' + next + ' mode', 'success');
     });
 }
 
@@ -534,15 +542,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     initComparison();
     initKeyboardShortcuts();
 
+    showToast('Loading WebAssembly module...', 'loading', true);
+
+    el.clickGuard.addEventListener('click', (e) => {
+        const hint = document.createElement('div');
+        hint.className = 'click-feedback';
+        hint.textContent = 'Loading...';
+        hint.style.left = e.clientX + 'px';
+        hint.style.top = e.clientY + 'px';
+        document.body.appendChild(hint);
+        setTimeout(() => hint.remove(), 1000);
+    });
+
     try {
         await initWasm();
         state.wasmReady = true;
+        el.clickGuard.classList.add('hidden');
+        hideToast();
         const models = await fetchModels();
         populateModelSelect(models);
         restoreSettings();
         showToast('WebAssembly module loaded successfully', 'success');
     } catch (err) {
-        showToast('WebAssembly module loading failed: ' + err.message, 'error');
+        showToast('WebAssembly module loading failed: ' + err.message, 'error', true);
         console.error('initWasm:', err);
     }
 });
